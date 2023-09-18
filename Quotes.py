@@ -23,6 +23,7 @@ class Quotes:
 
     def __init__(self) -> None:
         self.quotes_factory = load_quotes_df()
+        self.category_set = None
         print("Quotes Factory Initialised")
 
     def get_quotes(self, num_of_quotes):
@@ -36,3 +37,14 @@ class Quotes:
                 "category": row["category"],
             })
         return quotes
+
+    def get_categories(self):
+
+        if self.category_set is None:
+            category_set = {"a"}
+
+            for each in self.quotes_factory["category"].unique():
+                if type(each) == str:
+                    category_set.update(each.split(", "))
+            self.category_set = category_set
+        return self.category_set
