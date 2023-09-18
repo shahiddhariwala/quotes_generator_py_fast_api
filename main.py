@@ -1,10 +1,28 @@
 
 from typing import Union
-
+import pandas as pd
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
+import random
+
+NUM_OF_FILES = 2
+quotes_df = None
+
 
 app = FastAPI()
+
+
+def load_quotes_df():
+    global quotes_df
+    dfs = []
+    for i in range(NUM_OF_FILES):
+        df = pd.read_csv(f"quotes-500k-webscrapped-{i+1}.csv")
+        dfs.append(df)
+    quotes_df = pd.concat(dfs, ignore_index=True)
+    print(quotes_df.sample(1))
+
+
+load_quotes_df()
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -51,7 +69,10 @@ body {
 
 @app.get("/quote")
 def get_random_quote(num_quotes: int = 1):
-    return "Coming soon"
+    global quotes_df
+
+    print(quotes_df.sample(num_quotes), type(quotes_df.sample(num_quotes)))
+    return quotes_df.sample(num_quotes)
 
 
 if __name__ == "__main__":
