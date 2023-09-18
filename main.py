@@ -3,7 +3,8 @@ from typing import Union
 import pandas as pd
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-import random
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 
 NUM_OF_FILES = 2
 quotes_df = None
@@ -19,7 +20,7 @@ def load_quotes_df():
         df = pd.read_csv(f"quotes-500k-webscrapped-{i+1}.csv")
         dfs.append(df)
     quotes_df = pd.concat(dfs, ignore_index=True)
-    print(quotes_df.sample(1))
+    print("Quotes 500k DF Loaded to serve")
 
 
 load_quotes_df()
@@ -70,9 +71,18 @@ body {
 @app.get("/quote")
 def get_random_quote(num_quotes: int = 1):
     global quotes_df
+    data = {
+        "quotes": []
+    }
 
-    print(quotes_df.sample(num_quotes), type(quotes_df.sample(num_quotes)))
-    return quotes_df.sample(num_quotes)
+    for index, row in quotes_df.sample(num_quotes).iterrows():
+        data["quotes"].append({
+            "id": index,
+            "quote": row["quote"],
+            "author": row["author"],
+            "category": row["category"],
+        })
+    return data
 
 
 if __name__ == "__main__":
